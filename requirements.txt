@@ -1,0 +1,8 @@
+Flask
+Flask-SQLAlchemy
+requests
+psutil
+numpy
+python-dotenv
+google-generativeai
+mysql-connector-python
