@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud Monitor — Dashboard</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+:root{
+  --bg:#080812;
+  --sidebar:#0d0d1d;
+  --panel:#151533;
+  --card:#1c1c3f;
+  --purple:#8656ff;
+  --blue:#4ab3ff;
+  --success:#4dff9d;
+  --danger:#ff5d5d;
+  --text:#f1f3ff;
+  --muted:#a6aacb;
+  --border:rgba(255,255,255,.1);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:radial-gradient(160% 130% at top,#1a1a38,#05050a);
+  color:var(--text);
+  font-family:Inter,system-ui;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  height:100vh;
+}
+
+.sidebar{
+  background:#0d0d1e;
+  border-right:1px solid var(--border);
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+}
+
+.device{
+  background:#141431;
+  border:1px solid var(--border);
+  padding:10px 12px;
+  border-radius:12px;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+.device.active{border-color:#8656ff}
+
+.register-btn{
+  margin-top:auto;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  color:white;
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+}
+
+.content{
+  padding:20px;
+  overflow-y:auto;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.status{
+  padding:6px 10px;
+  border-radius:10px;
+  border:1px solid var(--border)
+}
+.up{background:#133e26;color:var(--success)}
+.down{background:#3d1a1a;color:var(--danger)}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;
+  margin-top:14px;
+}
+
+.card{
+  background:#1a1a3b;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+}
+
+.charts{
+  margin-top:22px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+@media (max-width:1100px){
+  .charts{ grid-template-columns:repeat(2,1fr); }
+}
+
+@media (max-width:700px){
+  .charts{ grid-template-columns:1fr; }
+}
+
+
+/* NEW chart card */
+.chart-card{
+  background:#151533;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px 16px;
+  display:flex;
+  flex-direction:column;
+}
+
+.chart-card h4{
+  margin:0 0 10px 0;
+  font-weight:600;
+  color:#cfd2ff;
+}
+
+/* responsive charts */
+.chart-card canvas{
+  width:100%;
+  height:220px;
+  border-radius:14px;
+  background:#0f0f22;
+}
+  
+table{width:100%;margin-top:16px;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #2c2c48}
+
+/* click to enlarge */
+.chart-card{ cursor:pointer; }
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-content{
+  background:#0f0f22;
+  padding:16px;
+  border-radius:18px;
+  border:1px solid var(--border);
+  width:90%;
+  max-width:900px;
+  height:70vh;
+  position:relative;
+}
+
+.modal-content canvas{
+  width:100%;
+  height:100%;
+}
+
+#closeModal{
+  position:absolute;
+  right:14px;
+  top:10px;
+  font-size:26px;
+  cursor:pointer;
+  color:#fff;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3>Devices</h3>
+    <div id="deviceList"></div>
+
+    <button class="register-btn" onclick="openHistory()">
+        SEE HISTORY
+    </button>
+  </div>
+
+  <!-- Main -->
+  <div class="content">
+
+    <div class="header">
+      <h1 id="deviceName">Dashboard</h1>
+      <span id="status" class="status">Loading...</span>
+    </div>
+
+    <!-- QUICK CARDS -->
+    <div class="cards">
+      <div class="card"><h4>CPU</h4><h2 id="cpuVal">--%</h2></div>
+      <div class="card"><h4>Memory</h4><h2 id="memVal">--%</h2></div>
+      <div class="card"><h4>Disk</h4><h2 id="diskVal">--%</h2></div>
+      <div class="card"><h4>Processes</h4><h2 id="procVal">--</h2></div>
+      <div class="card"><h4>Uptime</h4><h2 id="uptimeVal">--</h2></div>
+      <div class="card"><h4>Temp</h4><h2 id="tempVal">--°C</h2></div>
+    </div>
+
+    <!-- ALL METRIC CHARTS -->
+    <div class="charts">
+
+  <div class="chart-card">
+    <h4>CPU Usage</h4>
+    <canvas id="cpuChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h4>Memory Usage</h4>
+    <canvas id="memChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h4>Disk Usage</h4>
+    <canvas id="diskChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h4>Processes</h4>
+    <canvas id="procChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h4>Upload Speed</h4>
+    <canvas id="uploadChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h4>Download Speed</h4>
+    <canvas id="downloadChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h4>Temperature</h4>
+    <canvas id="tempChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h4>Uptime</h4>
+    <canvas id="uptimeChart"></canvas>
+  </div>
+
+</div>
+
+
+    <h2>Alerts</h2>
+    <table>
+      <thead>
+        <tr><th>Message</th><th>Severity</th><th>Time</th></tr>
+      </thead>
+      <tbody id="alertTable"></tbody>
+    </table>
+
+  </div>
+</div>
+
+<div id="chartModal" class="modal">
+  <div class="modal-content">
+    <span id="closeModal">&times;</span>
+    <canvas id="modalCanvas"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+
+<script>
+Chart.defaults.color = "#f1f3ff";
+Chart.defaults.borderColor = "rgba(255,255,255,.1)";
+Chart.defaults.elements.line.borderColor = "#4ab3ff";
+Chart.defaults.elements.line.backgroundColor = "transparent";
+Chart.defaults.elements.line.borderWidth = 2;
+</script>
+
+
+<script src="/static/script.js"></script>
+
+</body>
+</html>

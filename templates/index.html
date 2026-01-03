@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud Monitor — Smart System Monitoring</title>
+  <link rel="stylesheet" href="/static/style.css" />
+
+  <style>
+    :root{
+      --black:#07070d;
+      --surface:#0c0c1a;
+      --card:#14142a;
+      --panel:#1a1a36;
+      --purple:#8656ff;
+      --blue:#47b3ff;
+      --cyan:#4dffff;
+      --muted:#a3a8c6;
+      --text:#f3f4ff;
+      --border:rgba(255,255,255,.08);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      background:
+        linear-gradient(180deg,rgba(27, 27, 82, 0.9),#050510),
+        radial-gradient(60% 30% at 10% -5%,rgba(98, 46, 242, 0.25),transparent),
+        radial-gradient(60% 40% at 90% 0%,rgba(35, 142, 236, 0.16),transparent);
+      color:var(--text);
+      font-family:Inter,Segoe UI,system-ui,-apple-system,sans-serif;
+    }
+
+    section{padding:80px 0}
+
+    .container{
+      max-width:1150px;
+      margin:auto;
+      padding:0 32px;
+    }
+
+    /* --- HERO --- */
+    .hero{text-align:center;padding-top:110px}
+
+    .badge{
+      display:inline-block;
+      padding:6px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      font-size:.82rem;
+      margin-bottom:16px;
+    }
+
+    .hero h1{
+      font-size:3.6rem;
+      margin:6px 0 10px;
+      letter-spacing:.4px;
+    }
+
+    .hero p{
+      max-width:760px;
+      margin:14px auto 0;
+      color:var(--muted);
+      font-size:1.16rem;
+      line-height:1.7;
+    }
+
+    .buttons{
+      margin-top:36px;
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      padding:13px 22px;
+      border-radius:14px;
+      border:none;
+      cursor:pointer;
+      font-size:.98rem;
+      font-weight:700;
+      transition:.25s;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--purple),var(--blue));
+      color:white;
+      box-shadow:0 8px 26px rgba(120,70,255,.35);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      color:var(--text);
+      backdrop-filter:blur(10px);
+    }
+
+    .btn:hover{transform:translateY(-3px);}
+
+    /* --- FEATURE GRID --- */
+    .features{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:22px;
+      margin-top:26px;
+    }
+
+    .card{
+      background:linear-gradient(200deg,#1b1b39,#111128);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:22px;
+      box-shadow:0 10px 24px rgba(0,0,0,.45);
+      transition:.35s;
+      min-height:150px;
+    }
+
+    .card:hover{
+      transform:translateY(-5px);
+      border-color:rgba(140,100,255,.6);
+      box-shadow:0 16px 36px rgba(0,0,0,.55);
+    }
+
+    .card h3{margin:6px 0 6px;font-size:1.12rem;}
+    .card p{color:var(--muted);font-size:.95rem;line-height:1.55;}
+
+    /* --- PREVIEW --- */
+    .preview{
+      margin-top:10px;
+      text-align:center;
+    }
+
+    .preview-box{
+      margin-top:18px;
+      background:linear-gradient(180deg,#121227,#0c0c19);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:22px;
+      min-height:260px;
+      box-shadow:0 10px 24px rgba(0,0,0,.45);
+    }
+
+    .preview-box .hint{
+      color:var(--muted);
+      margin-top:6px;
+      font-size:.9rem;
+    }
+
+    /* --- AI STRIP --- */
+    .ai{
+      background:#0a0a18;
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+    }
+
+    .ai .panel{
+      background:#121228;
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:26px;
+    }
+
+    .ai h2{margin:0 0 8px}
+    .ai p{max-width:660px;color:var(--muted)}
+
+    .highlight{
+      margin-top:18px;
+      padding:10px 14px;
+      border-radius:12px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      font-size:.92rem;
+    }
+
+    /* --- FAQ --- */
+    .faq h3{margin:16px 0 4px}
+
+    /* --- CTA --- */
+    .cta{
+      text-align:center;
+      background:#0e0e22;
+      padding:90px 32px;
+      border-top:1px solid var(--border);
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:.85rem;
+      padding:30px 0 55px;
+      border-top:1px solid var(--border);
+    }
+    .preview-img{
+        width:100%;
+        border-radius:14px;
+        display:block;
+        box-shadow:0 10px 26px rgba(0,0,0,.45);
+        border:1px solid rgba(255,255,255,.08);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HERO -->
+  <section class="hero container">
+    <span class="badge">Production-ready Monitoring</span>
+
+    <h1>Cloud Monitor</h1>
+
+    <p>
+      Real-time visibility. Smart alerts. AI-powered predictions.<br/>
+      A lightweight monitoring stack that scales with your systems — not against them.
+    </p>
+
+    <div class="buttons">
+      <button class="btn btn-primary" onclick="window.location='/dashboard'">Go to Dashboard</button>
+      <button class="btn btn-secondary" onclick="window.location='/register'">Register Device</button>
+      <button class="btn btn-secondary" onclick="window.location='/insights'">GenAI Insights</button>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section>
+    <div class="container features">
+
+      <div class="card">
+        <h3>📊 Real-Time Metrics</h3>
+        <p>CPU, Memory, Disk & Network — optimized to surface problems instantly.</p>
+      </div>
+
+      <div class="card">
+        <h3>⚠ Smart Alerts</h3>
+        <p>Automatic thresholds & downtime notifications — stay ahead of issues.</p>
+      </div>
+
+      <div class="card">
+        <h3>🌎 Multi-Device View</h3>
+        <p>Monitor multiple servers, laptops, and VMs — all from one dashboard.</p>
+      </div>
+
+      <div class="card">
+        <h3>🤖 Predictive Insights</h3>
+        <p>Forecast disk capacity and CPU saturation before outages hit.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PREVIEW -->
+  <section>
+    <div class="container preview">
+      <h2>See Your Systems at a Glance</h2>
+      <p>Minimal noise. Maximum clarity.</p>
+
+      <div class="preview-box">
+          <img
+                src="/static/images/img.png"
+                alt="Cloud Monitor Dashboard Preview"
+                class="preview-img"
+                />
+
+      </div>
+    </div>
+  </section>
+
+  <!-- AI SECTION -->
+  <section class="ai">
+    <div class="container panel">
+      <h2>Built for AI-Ready Operations</h2>
+      <p>
+        Cloud Monitor uses predictive analytics to warn you about failures before they happen —
+        helping you reduce downtime and plan smarter capacity upgrades.
+      </p>
+
+      <div class="highlight">
+        💡 “If current usage continues, Disk may reach 95% in 6 days.”
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="container faq">
+      <h2>Frequently Asked Questions</h2>
+
+      <h3>Do I need to install anything?</h3>
+      <p>Yes — a lightweight agent sends metrics securely to your server.</p>
+
+      <h3>Is everything self-hosted?</h3>
+      <p>Yes. Your metrics never leave your infrastructure.</p>
+
+        <h3>Can I monitor multiple devices?</h3>
+        <p>Yes — add as many devices as you like to your dashboard.</p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2>Ready to Monitor Smarter?</h2>
+    <p>Deploy in minutes — gain visibility instantly.</p>
+
+    <div class="buttons" style="margin-top:20px;">
+      <button class="btn btn-primary" onclick="window.location='/dashboard'">
+        Launch Dashboard
+      </button>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 Cloud Monitor — Smart, Reliable, Production-Ready
+  </footer>
+
+</body>
+</html>

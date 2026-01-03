@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud Monitor — History</title>
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    body{background:#0b0b16;color:#f2f4ff;font-family:Inter}
+    .wrap{max-width:1100px;margin:40px auto;padding:16px}
+    .panel{background:#141432;border:1px solid #23234f;border-radius:16px;padding:18px;margin-top:14px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    select,button{padding:10px;border-radius:10px;border:1px solid #2a2a52;background:#0f0f26;color:white}
+    canvas{background:#0d0d22;border-radius:14px;padding:10px}
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <h1>Historical Analytics</h1>
+
+  <!-- Filters -->
+  <div class="panel row">
+    <select id="deviceSelect"></select>
+
+    <select id="rangeSelect">
+      <option value="30">Last 30 min</option>
+      <option value="60" selected>Last 1 hour</option>
+      <option value="240">Last 4 hours</option>
+      <option value="1440">Last 24 hours</option>
+    </select>
+
+    <button onclick="loadHistory()">Load</button>
+    <button onclick="window.location='/'">Back to Dashboard</button>
+  </div>
+
+  <div class="panel" id="summary"></div>
+
+  <div class="panel"><h2>CPU</h2><canvas id="cpuChart"></canvas></div>
+  <div class="panel"><h2>Memory</h2><canvas id="memChart"></canvas></div>
+  <div class="panel"><h2>Disk</h2><canvas id="diskChart"></canvas></div>
+  <div class="panel"><h2>Network</h2><canvas id="netChart"></canvas></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/history.js"></script>
+
+</body>
+</html>

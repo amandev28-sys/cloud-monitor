@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register Device — Cloud Monitor</title>
+  <link rel="stylesheet" href="/static/style.css">
+
+  <style>
+    body{
+      font-family: Inter, system-ui;
+      background: radial-gradient(160% 130% at top,#1a1a38,#05050a);
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      margin:0;
+    }
+
+    .box{
+      background:#0f0f23;
+      padding:25px 28px;
+      border-radius:16px;
+      width:420px;
+      border:1px solid rgba(255,255,255,.1);
+    }
+
+    h2{margin-top:0}
+
+    input{
+      width:100%;
+      margin-top:8px;
+      padding:10px;
+      border-radius:10px;
+      border:none;
+      outline:none;
+    }
+
+    button{
+      margin-top:20px;
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      border:none;
+      background:linear-gradient(135deg,#8855ff,#4ab3ff);
+      color:white;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .token-box{
+      background:#111133;
+      padding:10px;
+      border-radius:10px;
+      margin-top:12px;
+      font-family:monospace;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h2>Register New Device</h2>
+
+  <label>Device Name</label>
+  <input id="name" placeholder="Example: My Laptop">
+
+  <button onclick="register()">Register</button>
+
+  <div id="result"></div>
+
+</div>
+
+<script>
+async function register(){
+  let name = document.getElementById("name").value;
+
+  if(!name){
+    alert("Enter device name");
+    return;
+  }
+
+  const res = await fetch("/api/register", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ name })
+  });
+
+  const data = await res.json();
+
+  if(data.error){
+    document.getElementById("result").innerHTML =
+      "<p style='color:red'>"+data.error+"</p>";
+    return;
+  }
+
+  document.getElementById("result").innerHTML = `
+  <p>Device registered successfully!</p>
+
+  <p><b>Token:</b> ${data.token}</p>
+
+  <button onclick="window.location='/download-agent/${data.token}'">
+    Download Agent
+  </button>
+
+  <p style="margin-top:10px;">After downloading, run:</p>
+
+  <div class="token-box">
+    python agent.py --install
+  </div>
+
+  <button onclick="window.location='/dashboard'">
+    Go to Dashboard
+  </button>
+`;
+
+}
+</script>
+
+</body>
+</html>
