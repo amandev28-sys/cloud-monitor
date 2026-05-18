@@ -1,293 +1,815 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Cloud Monitor — Dashboard</title>
 
   <link rel="stylesheet" href="/static/style.css">
 
   <style>
-:root{
-  --bg:#080812;
-  --sidebar:#0d0d1d;
-  --panel:#151533;
-  --card:#1c1c3f;
-  --purple:#8656ff;
-  --blue:#4ab3ff;
-  --success:#4dff9d;
-  --danger:#ff5d5d;
-  --text:#f1f3ff;
-  --muted:#a6aacb;
-  --border:rgba(255,255,255,.1);
-}
+    :root {
+      --bg: #080812;
+      --sidebar: #0d0d1d;
+      --panel: #151533;
+      --card: #1c1c3f;
+      --purple: #8656ff;
+      --blue: #4ab3ff;
+      --success: #4dff9d;
+      --danger: #ff5d5d;
+      --text: #f1f3ff;
+      --muted: #a6aacb;
+      --border: rgba(255, 255, 255, .1);
+    }
 
-*{box-sizing:border-box}
+    * {
+      box-sizing: border-box
+    }
 
-body{
-  margin:0;
-  background:radial-gradient(160% 130% at top,#1a1a38,#05050a);
-  color:var(--text);
-  font-family:Inter,system-ui;
-}
+    body {
+      margin: 0;
+      background: radial-gradient(160% 130% at top, #1a1a38, #05050a);
+      color: var(--text);
+      font-family: Inter, system-ui;
+    }
 
-.layout{
-  display:grid;
-  grid-template-columns:240px 1fr;
-  height:100vh;
-}
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      height: 100vh;
+    }
 
-.sidebar{
-  background:#0d0d1e;
-  border-right:1px solid var(--border);
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-}
+    .sidebar {
+      background: #0d0d1e;
+      border-right: 1px solid var(--border);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+    }
 
-.device{
-  background:#141431;
-  border:1px solid var(--border);
-  padding:10px 12px;
-  border-radius:12px;
-  margin-bottom:10px;
-  cursor:pointer;
-}
-.device.active{border-color:#8656ff}
+    .device {
+      background: #141431;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
 
-.register-btn{
-  margin-top:auto;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  color:white;
-  background:linear-gradient(135deg,var(--purple),var(--blue));
-}
+    .device.active {
+      border-color: #8656ff
+    }
 
-.content{
-  padding:20px;
-  overflow-y:auto;
-}
+    .register-btn {
+      margin-top: auto;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+    }
 
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+    .content {
+      padding: 20px;
+      overflow-y: auto;
+    }
 
-.status{
-  padding:6px 10px;
-  border-radius:10px;
-  border:1px solid var(--border)
-}
-.up{background:#133e26;color:var(--success)}
-.down{background:#3d1a1a;color:var(--danger)}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:14px;
-  margin-top:14px;
-}
+    .status {
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border)
+    }
 
-.card{
-  background:#1a1a3b;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:14px;
-}
+    .up {
+      background: #133e26;
+      color: var(--success)
+    }
 
-.charts{
-  margin-top:22px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:18px;
-}
+    .down {
+      background: #3d1a1a;
+      color: var(--danger)
+    }
 
-@media (max-width:1100px){
-  .charts{ grid-template-columns:repeat(2,1fr); }
-}
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
 
-@media (max-width:700px){
-  .charts{ grid-template-columns:1fr; }
-}
+    .card {
+      background: #1a1a3b;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .charts {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    @media (max-width:1100px) {
+      .charts {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width:700px) {
+      .charts {
+        grid-template-columns: 1fr;
+      }
+    }
 
 
-/* NEW chart card */
-.chart-card{
-  background:#151533;
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:14px 16px;
-  display:flex;
-  flex-direction:column;
-}
+    /* NEW chart card */
+    .chart-card {
+      background: #151533;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+    }
 
-.chart-card h4{
-  margin:0 0 10px 0;
-  font-weight:600;
-  color:#cfd2ff;
-}
+    .chart-card h4 {
+      margin: 0 0 10px 0;
+      font-weight: 600;
+      color: #cfd2ff;
+    }
 
-/* responsive charts */
-.chart-card canvas{
-  width:100%;
-  height:220px;
-  border-radius:14px;
-  background:#0f0f22;
-}
-  
-table{width:100%;margin-top:16px;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid #2c2c48}
+    /* responsive charts */
+    .chart-card canvas {
+      width: 100%;
+      height: 220px;
+      border-radius: 14px;
+      background: #0f0f22;
+    }
 
-/* click to enlarge */
-.chart-card{ cursor:pointer; }
+    table {
+      width: 100%;
+      margin-top: 16px;
+      border-collapse: collapse
+    }
 
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  z-index:9999;
-  align-items:center;
-  justify-content:center;
-}
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #2c2c48
+    }
 
-.modal-content{
-  background:#0f0f22;
-  padding:16px;
-  border-radius:18px;
-  border:1px solid var(--border);
-  width:90%;
-  max-width:900px;
-  height:70vh;
-  position:relative;
-}
+    /* click to enlarge */
+    .chart-card {
+      cursor: pointer;
+    }
 
-.modal-content canvas{
-  width:100%;
-  height:100%;
-}
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
 
-#closeModal{
-  position:absolute;
-  right:14px;
-  top:10px;
-  font-size:26px;
-  cursor:pointer;
-  color:#fff;
-}
+    .modal-content {
+      background: #0f0f22;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      width: 90%;
+      max-width: 900px;
+      height: 70vh;
+      position: relative;
+    }
 
-</style>
+    .modal-content canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #closeModal {
+      position: absolute;
+      right: 14px;
+      top: 10px;
+      font-size: 26px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    #processTable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #processTable th,
+    #processTable td {
+      padding: 10px;
+      border-bottom: 1px solid #2a2a44;
+    }
+
+    .danger-row {
+      background: rgba(255, 0, 0, .12);
+    }
+
+    /* ---------- PROCESS MONITOR ---------- */
+
+    .process-card {
+      margin-top: 22px;
+    }
+
+    .process-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .process-header h4 {
+      margin: 0;
+      font-size: 1rem;
+      color: #dfe3ff;
+    }
+
+    .process-badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(74, 179, 255, .12);
+      border: 1px solid rgba(74, 179, 255, .35);
+      color: #7fd0ff;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+
+    .process-table-wrapper {
+      max-height: 340px;
+      overflow-y: auto;
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    /* custom scrollbar */
+    .process-table-wrapper::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .process-table-wrapper::-webkit-scrollbar-thumb {
+      background: #3a3a6b;
+      border-radius: 20px;
+    }
+
+    .process-table-wrapper::-webkit-scrollbar-track {
+      background: #121226;
+    }
+
+    #processTable {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+      background: #101024;
+    }
+
+    #processTable thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    #processTable th {
+      background: #171736;
+      color: #d8ddff;
+      text-align: left;
+      padding: 14px;
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    #processTable td {
+      padding: 13px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, .05);
+      color: #d5d9ff;
+      font-size: .92rem;
+    }
+
+    #processTable tbody tr {
+      transition: .18s ease;
+    }
+
+    #processTable tbody tr:hover {
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .danger-row {
+      background: rgba(255, 70, 70, .12);
+    }
+
+    .danger-row td {
+      color: #ffb3b3;
+    }
+
+    /* ---------- PROCESS STATUS BADGES ---------- */
+
+    .status-badge {
+
+      padding: 5px 10px;
+
+      border-radius: 999px;
+
+      font-size: .72rem;
+
+      font-weight: 700;
+
+      text-transform: uppercase;
+
+      letter-spacing: .4px;
+    }
+
+    .status-badge.running {
+      background: rgba(77, 255, 157, .12);
+      color: #63ffb0;
+    }
+
+    .status-badge.sleeping {
+      background: rgba(255, 214, 74, .12);
+      color: #ffd84a;
+    }
+
+    .status-badge.stopped {
+      background: rgba(255, 90, 90, .12);
+      color: #ff8f8f;
+    }
+
+    .status-badge.zombie {
+      background: rgba(180, 100, 255, .15);
+      color: #cda4ff;
+    }
+
+    /* HIGH CPU FLAG */
+
+    .cpu-critical {
+      color: #ff6767;
+      font-weight: 700;
+    }
+
+    /* ---------- PER CORE ---------- */
+
+    .core-container {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(auto-fit, minmax(140px, 1fr));
+
+      gap: 14px;
+
+      margin-top: 18px;
+    }
+
+    .core-card {
+
+      background: #121226;
+
+      border-radius: 16px;
+
+      padding: 14px;
+
+      border: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    .core-title {
+
+      font-size: .82rem;
+
+      color: #aab2d6;
+
+      margin-bottom: 10px;
+    }
+
+    .core-bar {
+
+      height: 10px;
+
+      border-radius: 999px;
+
+      background: #232344;
+
+      overflow: hidden;
+    }
+
+    .core-fill {
+
+      height: 100%;
+
+      border-radius: 999px;
+
+      transition: .4s ease;
+    }
+
+    .core-value {
+
+      margin-top: 10px;
+
+      font-weight: 700;
+
+      font-size: .92rem;
+    }
+
+    /* ---------- NETWORK TABLE ---------- */
+
+    .network-wrapper {
+
+      margin-top: 18px;
+
+      max-height: 320px;
+
+      overflow: auto;
+
+      border-radius: 16px;
+
+      border: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    #networkTable {
+
+      width: 100%;
+
+      border-collapse: collapse;
+    }
+
+    #networkTable th {
+
+      position: sticky;
+
+      top: 0;
+
+      background: #171736;
+
+      padding: 12px;
+
+      text-align: left;
+
+      color: #d8ddff;
+    }
+
+    #networkTable td {
+
+      padding: 12px;
+
+      border-bottom:
+        1px solid rgba(255, 255, 255, .05);
+    }
+
+    #networkTable tr:hover {
+
+      background:
+        rgba(255, 255, 255, .04);
+
+
+    }
+
+
+    /* ---------- PREDICTIVE ANALYTICS ---------- */
+
+    .predict-item {
+
+      margin-top: 14px;
+
+      padding: 18px;
+
+      border-radius: 16px;
+
+      border-left: 5px solid;
+
+      background: #121226;
+    }
+
+    .predict-title {
+
+      font-size: .9rem;
+
+      color: #b9c0e5;
+    }
+
+    .predict-value {
+
+      margin-top: 10px;
+
+      font-size: 1.5rem;
+
+      font-weight: 700;
+
+      color: white;
+    }
+
+    .predict-meta {
+
+      margin-top: 8px;
+
+      font-size: .82rem;
+
+      color: #8f97c0;
+    }
+
+    /* ---------- STATES ---------- */
+
+    .predict-item.critical {
+
+      border-color: #ff6767;
+    }
+
+    .predict-item.warning {
+
+      border-color: #ffd166;
+    }
+
+    .predict-item.stable {
+
+      border-color: #79ffae;
+    }
+
+    .predict-empty {
+
+      padding: 16px;
+
+      color: #b9c0e5;
+    }
+  </style>
 
 </head>
 
 <body>
 
-<div class="layout">
+  <div class="layout">
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h3>Devices</h3>
-    <div id="deviceList"></div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h3>Devices</h3>
+      <div id="deviceList"></div>
 
-    <button class="register-btn" onclick="openHistory()">
+      <button class="register-btn" onclick="openHistory()">
         SEE HISTORY
-    </button>
-  </div>
-
-  <!-- Main -->
-  <div class="content">
-
-    <div class="header">
-      <h1 id="deviceName">Dashboard</h1>
-      <span id="status" class="status">Loading...</span>
+      </button>
     </div>
 
-    <!-- QUICK CARDS -->
-    <div class="cards">
-      <div class="card"><h4>CPU</h4><h2 id="cpuVal">--%</h2></div>
-      <div class="card"><h4>Memory</h4><h2 id="memVal">--%</h2></div>
-      <div class="card"><h4>Disk</h4><h2 id="diskVal">--%</h2></div>
-      <div class="card"><h4>Processes</h4><h2 id="procVal">--</h2></div>
-      <div class="card"><h4>Uptime</h4><h2 id="uptimeVal">--</h2></div>
-      <div class="card"><h4>Temp</h4><h2 id="tempVal">--°C</h2></div>
+    <!-- Main -->
+    <div class="content">
+
+      <div class="header">
+        <h1 id="deviceName">Dashboard</h1>
+        <span id="status" class="status">Loading...</span>
+      </div>
+
+      <!-- QUICK CARDS -->
+      <div class="cards">
+        <div class="card">
+          <h4>CPU</h4>
+          <h2 id="cpuVal">--%</h2>
+        </div>
+        <div class="card">
+          <h4>Memory</h4>
+          <h2 id="memVal">--%</h2>
+        </div>
+        <div class="card">
+          <h4>Disk</h4>
+          <h2 id="diskVal">--%</h2>
+        </div>
+        <div class="card">
+          <h4>Processes</h4>
+          <h2 id="procVal">--</h2>
+        </div>
+        <div class="card">
+          <h4>Uptime</h4>
+          <h2 id="uptimeVal">--</h2>
+        </div>
+        <div class="card">
+          <h4>Temp</h4>
+          <h2 id="tempVal">--°C</h2>
+        </div>
+      </div>
+
+      <!-- ALL METRIC CHARTS -->
+      <div class="charts">
+
+        <div class="chart-card">
+          <h4>CPU Usage</h4>
+          <canvas id="cpuChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Memory Usage</h4>
+          <canvas id="memChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Disk Usage</h4>
+          <canvas id="diskChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Processes</h4>
+          <canvas id="procChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Upload Speed</h4>
+          <canvas id="uploadChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Download Speed</h4>
+          <canvas id="downloadChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Temperature</h4>
+          <canvas id="tempChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <h4>Uptime</h4>
+          <canvas id="uptimeChart"></canvas>
+        </div>
+
+      </div>
+
+      <!-- PER-CORE CPU -->
+
+      <div class="chart-card">
+
+        <div class="card-head">
+
+          <h3>Per-Core CPU Usage</h3>
+
+        </div>
+
+        <div id="coreContainer" class="core-container">
+
+        </div>
+
+      </div>
+
+      <!-- TOP PROCESS MONITOR -->
+      <div class="chart-card process-card">
+
+        <div class="process-header">
+
+          <h4>Top Running Processes</h4>
+
+          <div class="process-badge">
+            LIVE
+          </div>
+
+        </div>
+
+        <div class="process-table-wrapper">
+
+          <table id="processTable">
+
+            <thead>
+              <tr>
+
+                <th>PID</th>
+
+                <th>Process</th>
+
+                <th>CPU %</th>
+
+                <th>RAM %</th>
+
+                <th>Threads</th>
+
+                <th>Status</th>
+
+                <th>User</th>
+
+                <th>Started</th>
+
+              </tr>
+            </thead>
+
+            <tbody></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+      <!-- LIVE NETWORK CONNECTIONS -->
+
+      <div class="chart-card">
+
+        <div class="card-head">
+
+          <h3 style="margin-top:24px;">Live Network Connections</h3>
+
+        </div>
+
+        <div class="network-wrapper">
+
+          <table id="networkTable">
+
+            <thead>
+
+              <tr>
+
+                <th>PID</th>
+
+                <th>Remote IP</th>
+
+                <th>Remote Port</th>
+
+                <th>Status</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+
+      <!-- PREDICTIVE FAILURE DETECTION -->
+
+      <div class="chart-card">
+
+        <div class="card-head">
+
+          <h3 style="margin-top:24px;">
+            Predictive Failure Detection
+          </h3>
+
+        </div>
+
+        <div id="predictBox">
+
+          Analyzing telemetry trends...
+
+        </div>
+
+      </div>
+
+      <h2 style="margin-top:24px;">Alerts</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Message</th>
+            <th>Severity</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+
+        <tbody id="alertTable"></tbody>
+      </table>
+
     </div>
 
-    <!-- ALL METRIC CHARTS -->
-    <div class="charts">
+    <!-- MODAL -->
+    <div id="chartModal" class="modal">
 
-  <div class="chart-card">
-    <h4>CPU Usage</h4>
-    <canvas id="cpuChart"></canvas>
-  </div>
+      <div class="modal-content">
 
-  <div class="chart-card">
-    <h4>Memory Usage</h4>
-    <canvas id="memChart"></canvas>
-  </div>
+        <span id="closeModal">&times;</span>
 
-  <div class="chart-card">
-    <h4>Disk Usage</h4>
-    <canvas id="diskChart"></canvas>
-  </div>
+        <canvas id="modalCanvas"></canvas>
 
-  <div class="chart-card">
-    <h4>Processes</h4>
-    <canvas id="procChart"></canvas>
-  </div>
+      </div>
 
-  <div class="chart-card">
-    <h4>Upload Speed</h4>
-    <canvas id="uploadChart"></canvas>
-  </div>
-
-  <div class="chart-card">
-    <h4>Download Speed</h4>
-    <canvas id="downloadChart"></canvas>
-  </div>
-
-  <div class="chart-card">
-    <h4>Temperature</h4>
-    <canvas id="tempChart"></canvas>
-  </div>
-
-  <div class="chart-card">
-    <h4>Uptime</h4>
-    <canvas id="uptimeChart"></canvas>
-  </div>
-
-</div>
+    </div>
 
 
-    <h2>Alerts</h2>
-    <table>
-      <thead>
-        <tr><th>Message</th><th>Severity</th><th>Time</th></tr>
-      </thead>
-      <tbody id="alertTable"></tbody>
-    </table>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
 
-  </div>
-</div>
-
-<div id="chartModal" class="modal">
-  <div class="modal-content">
-    <span id="closeModal">&times;</span>
-    <canvas id="modalCanvas"></canvas>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
-
-<script>
-Chart.defaults.color = "#f1f3ff";
-Chart.defaults.borderColor = "rgba(255,255,255,.1)";
-Chart.defaults.elements.line.borderColor = "#4ab3ff";
-Chart.defaults.elements.line.backgroundColor = "transparent";
-Chart.defaults.elements.line.borderWidth = 2;
-</script>
+    <script>
+      Chart.defaults.color = "#f1f3ff";
+      Chart.defaults.borderColor = "rgba(255,255,255,.1)";
+      Chart.defaults.elements.line.borderColor = "#4ab3ff";
+      Chart.defaults.elements.line.backgroundColor = "transparent";
+      Chart.defaults.elements.line.borderWidth = 2;
+    </script>
 
 
-<script src="/static/script.js"></script>
+    <script src="/static/script.js"></script>
 
 </body>
+
 </html>

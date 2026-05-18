@@ -26,10 +26,12 @@ class Metric(db.Model):
 
     # NEW METRICS
     processes = db.Column(db.Integer, nullable=True)
+    top_processes = db.Column(db.Text, nullable=True)
     upload = db.Column(db.Float, nullable=True)
     download = db.Column(db.Float, nullable=True)
     uptime = db.Column(db.Integer, nullable=True)
     temp = db.Column(db.Float, nullable=True)
+    connections = db.Column(db.Text,nullable=True)
 
     # store per-core values as JSON text
     per_core = db.Column(db.Text, nullable=True)

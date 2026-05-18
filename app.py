@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import os
 import google.generativeai as genai
 from config import Config
+import json
+import numpy as np
 
 load_dotenv()
 
@@ -105,52 +107,209 @@ def download_agent(token):
     code = f"""
 \"\"\" CLOUD MONITOR AUTO-INSTALLING AGENT \"\"\" 
 
-import os, sys, time, platform, requests, psutil, subprocess
+import os
+import sys
+import time
+import platform
+import requests
+import psutil
+import subprocess
+
 from datetime import datetime
 
 API_URL = "{server_url}/api/metrics"
 DEVICE_TOKEN = "{token}"
 INTERVAL = 5
 
+def get_connections():
+
+    conn_list = []
+
+    try:
+
+        connections = psutil.net_connections()
+
+        for c in connections[:25]:
+
+            try:
+
+                conn_list.append({{
+
+                    "local_ip":
+                    c.laddr.ip if c.laddr else "",
+
+                    "local_port":
+                    c.laddr.port if c.laddr else "",
+
+                    "remote_ip":
+                    c.raddr.ip if c.raddr else "",
+
+                    "remote_port":
+                    c.raddr.port if c.raddr else "",
+
+                    "status":
+                    c.status,
+
+                    "pid":
+                    c.pid
+                }})
+
+            except:
+                pass
+
+    except:
+        pass
+
+    return conn_list
+
+
+# ---------- TOP PROCESS MONITOR ---------- #
+
+def get_top_processes():
+
+    plist = []
+
+    for p in psutil.process_iter([
+        'pid',
+        'name',
+        'cpu_percent',
+        'memory_percent',
+        'status'
+    ]):
+
+        try:
+
+            plist.append({{
+
+            "pid": p.info['pid'],
+
+            "name": p.info['name'],
+
+            "cpu": round(
+                min(p.info['cpu_percent'], 100),
+                2
+            ),
+
+            "memory": round(
+                p.info['memory_percent'],
+                2
+            ),
+
+            "status": p.info['status'],
+
+            "threads": p.num_threads(),
+
+            "user": p.username(),
+
+            "started": p.create_time()
+
+        }})
+
+        except:
+            pass
+
+    plist = sorted(
+        plist,
+        key=lambda x: x["cpu"],
+        reverse=True
+    )
+
+    return plist[:10]
+
+
+# ---------- METRIC COLLECTION ---------- #
 
 def get_metrics():
+
     try:
+
         cpu = psutil.cpu_percent(interval=None)
+        per_core = psutil.cpu_percent(interval=None,percpu=True)
+
         mem = psutil.virtual_memory().percent
+
         disk = psutil.disk_usage("/").percent
+
+        processes = len(psutil.pids())
+
         net1 = psutil.net_io_counters()
+
         time.sleep(1)
+
         net2 = psutil.net_io_counters()
 
         return {{
+
             "token": DEVICE_TOKEN,
+
             "cpu": cpu,
+
             "memory": mem,
+
             "disk": disk,
-            "upload": round((net2.bytes_sent-net1.bytes_sent)/1024, 2),
-            "download": round((net2.bytes_recv-net1.bytes_recv)/1024, 2),
-            "uptime": int(time.time() - psutil.boot_time())
+
+            "processes": processes,
+
+            "top_processes": get_top_processes(),
+
+            "upload": round(
+                (net2.bytes_sent - net1.bytes_sent) / 1024,
+                2
+            ),
+
+            "download": round(
+                (net2.bytes_recv - net1.bytes_recv) / 1024,
+                2
+            ),
+
+            "uptime": int(
+                time.time() - psutil.boot_time()
+            ),
+            
+            "connections": get_connections(),
+            
+            "per_core": per_core
+
         }}
+
     except Exception as e:
+
         print("Metric error:", e)
+
         return None
 
 
+# ---------- SEND LOOP ---------- #
+
 def send_loop():
+
     while True:
+
         data = get_metrics()
+
         if data:
+
             try:
-                requests.post(API_URL, json=data, timeout=5)
+
+                requests.post(
+                    API_URL,
+                    json=data,
+                    timeout=5
+                )
+
             except Exception as e:
+
                 print("Network error:", e)
+
         time.sleep(INTERVAL)
 
 
-# -------- SERVICE INSTALLATION -------- #
+# ---------- SERVICE INSTALLATION ---------- #
 
 def install_windows():
+
     py = sys.executable
+
     script = os.path.abspath(__file__)
 
     cmd = [
@@ -162,11 +321,16 @@ def install_windows():
         "/RL", "HIGHEST"
     ]
 
-    subprocess.call(" ".join(cmd), shell=True)
+    subprocess.call(
+        " ".join(cmd),
+        shell=True
+    )
+
     print("Installed as Windows startup task")
 
 
 def install_linux():
+
     service = f\"\"\"[Unit]
 Description=Cloud Monitor Agent
 After=network.target
@@ -181,58 +345,91 @@ WantedBy=multi-user.target
 \"\"\"
 
     path = "/etc/systemd/system/cloud-agent.service"
+
     with open(path, "w") as f:
         f.write(service)
 
     os.system("systemctl daemon-reload")
     os.system("systemctl enable cloud-agent")
     os.system("systemctl start cloud-agent")
+
     print("Installed as systemd service")
 
 
 def install_mac():
+
     plist = f\"\"\"<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
 <plist version="1.0">
 <dict>
-  <key>Label</key><string>com.cloud.agent</string>
+
+  <key>Label</key>
+  <string>com.cloud.agent</string>
+
   <key>ProgramArguments</key>
+
   <array>
     <string>{{sys.executable}}</string>
     <string>{{os.path.abspath(__file__)}}</string>
   </array>
-  <key>RunAtLoad</key><true/>
-  <key>KeepAlive</key><true/>
-</dict>
-</plist>\"\"\"
 
-    path = os.path.expanduser("~/Library/LaunchAgents/com.cloud.agent.plist")
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+</dict>
+</plist>
+\"\"\"
+
+    path = os.path.expanduser(
+        "~/Library/LaunchAgents/com.cloud.agent.plist"
+    )
+
     with open(path, "w") as f:
         f.write(plist)
 
     os.system(f"launchctl load {{path}}")
+
     print("Installed as macOS launchd service")
 
 
 def install_service():
+
     os_name = platform.system().lower()
 
     if "windows" in os_name:
+
         install_windows()
+
     elif "linux" in os_name:
+
         install_linux()
+
     elif "darwin" in os_name:
+
         install_mac()
+
     else:
+
         print("Unsupported OS — running foreground")
+
         send_loop()
 
 
+# ---------- MAIN ---------- #
+
 if __name__ == "__main__":
+
     if "--install" in sys.argv:
+
         install_service()
+
     else:
+
         send_loop()
 """
 
@@ -273,7 +470,10 @@ def dashboard_api(device_id):
         "download": m.download,
         "uptime": m.uptime,
         "temp": m.temp,
-        "timestamp": m.timestamp.strftime("%H:%M:%S")
+        "timestamp": m.timestamp.strftime("%H:%M:%S"),
+        "top_processes": json.loads(m.top_processes) if m.top_processes else [],
+        "per_core": json.loads(m.per_core) if m.per_core else [],
+        "connections": json.loads(m.connections) if m.connections else []
     }
     for m in reversed(metrics)
     ]
@@ -300,6 +500,165 @@ def dashboard_api(device_id):
         "metrics": data,
         "alerts": alert_data
     })
+    
+@app.route("/api/predict")
+
+def predict_failures():
+
+    device_id =request.args.get(
+        "device_id"
+    )
+
+    if not device_id:
+
+        return jsonify({
+            "error":
+            "device_id required"
+        }), 400
+
+    metrics = (Metric.query
+            .filter_by(device_id=device_id)
+
+        .order_by(Metric.timestamp.desc())
+
+        .limit(30)
+
+        .all()
+    )
+
+    if len(metrics) < 5:
+
+        return jsonify({
+
+            "message":
+            "Not enough data for prediction"
+
+        })
+
+    metrics =list(reversed(metrics))
+
+    cpu_vals = [
+        m.cpu_usage or 0
+        for m in metrics
+    ]
+
+    mem_vals = [
+        m.memory_usage or 0
+        for m in metrics
+    ]
+
+    disk_vals = [
+        m.disk_usage or 0
+        for m in metrics
+    ]
+
+    # ---------- FORECAST ENGINE ---------- #
+
+    def regression_forecast(
+        values,
+        limit=95
+    ):
+
+        try:
+
+            if len(values) < 5:
+                return None
+
+            y = np.array(values)
+
+            x = np.arange(len(y))
+
+            # exponential smoothing
+            smooth = []
+
+            alpha = 0.4
+
+            s = y[0]
+
+            for v in y:
+
+                s = (
+                    alpha * v
+                    +
+                    (1 - alpha) * s
+                )
+
+                smooth.append(s)
+
+            smooth =np.array(smooth)
+
+            # regression
+            slope, intercept = np.polyfit(
+
+                x,
+                smooth,
+                1
+            )
+
+            if slope <= 0:
+                return None
+
+            current =smooth[-1]
+
+            remaining =limit - current
+
+            if remaining <= 0:
+                return 0
+
+            predicted_steps =remaining / slope
+
+            confidence = min(
+
+                95,
+
+                round(
+                    abs(slope) * 18,
+                    1
+                )
+            )
+
+            return {
+
+                "time":
+                round(predicted_steps, 1),
+
+                "confidence":
+                confidence,
+
+                "slope":
+                round(slope, 3)
+            }
+
+        except Exception:
+
+            return None
+
+    cpu_prediction =regression_forecast(
+        cpu_vals,
+        95
+    )
+
+    memory_prediction=regression_forecast(
+        mem_vals,
+        95
+    )
+
+    disk_prediction =regression_forecast(
+        disk_vals,
+        95
+    )
+
+    return jsonify({
+
+        "cpu":
+        cpu_prediction,
+
+        "memory":
+        memory_prediction,
+
+        "disk":
+        disk_prediction
+    })
 
 
 # ---------------- METRIC INGEST API ----------------
@@ -322,18 +681,22 @@ def receive_metrics():
     uptime = data.get("uptime")
     temp = data.get("temp")
     per_core = data.get("per_core")
+    top_processes = data.get("top_processes")
 
     metric = Metric(
         device_id=device.id,
         cpu_usage=cpu,
         memory_usage=memory,
         disk_usage=disk,
+        per_core=json.dumps(data.get("per_core", [])),
         processes=processes,
         upload=upload,
         download=download,
         uptime=uptime,
         temp=temp,
-        per_core=str(per_core) if per_core else None
+        top_processes=json.dumps(top_processes) if top_processes else None,
+        connections=json.dumps(data.get("connections", []))
+        
     )
 
     db.session.add(metric)
@@ -372,12 +735,20 @@ def insights_page():
 @app.route("/api/insights", methods=["POST"])
 def ai_insights():
     data = request.json
-    device_name = data.get("device")
-    minutes = int(data.get("minutes", 30))
 
-    device = Device.query.filter_by(name=device_name).first()
+    device_id = data.get("device")
+
+    minutes = int(
+        data.get("minutes", 30)
+    )
+
+    device = Device.query.get(device_id)
+
     if not device:
-        return jsonify({"error": "Device not found"}), 404
+
+        return jsonify({
+            "error": "Device not found"
+        }), 404
 
     since = datetime.utcnow() - timedelta(minutes=minutes)
 
@@ -445,8 +816,7 @@ def ai_insights():
 
     prompt = f"""
 You are an expert SRE/DevOps performance engineer.
-
-Analyze this server health data for **{device_name}**.
+Analyze this server health data for **{device.name}**.
 Time window: last {minutes} minutes.
 
 SUMMARY (aggregated):
@@ -476,7 +846,219 @@ Avoid repeating numbers unnecessarily. Explain *patterns*.
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route(
+    "/api/incident-chat/<int:device_id>",
+    methods=["POST"]
+)
 
+def incident_chat(device_id):
+
+    device = Device.query.get(device_id)
+
+    if not device:
+
+        return jsonify({
+
+            "error": "Device not found"
+
+        }), 404
+
+    data = request.json
+
+    user_query = data.get("query")
+
+    if not user_query:
+
+        return jsonify({
+
+            "error": "Query required"
+
+        }), 400
+
+    # ---------- LATEST METRIC ---------- #
+
+    metric = (
+
+        Metric.query
+
+        .filter_by(device_id=device_id)
+
+        .order_by(Metric.timestamp.desc())
+
+        .first()
+    )
+
+    if not metric:
+
+        return jsonify({
+
+            "error": "No metrics found"
+
+        }), 404
+
+    # ---------- PROCESS CONTEXT ---------- #
+
+    processes = (
+
+        json.loads(metric.top_processes)
+
+        if metric.top_processes else []
+    )
+
+    # ---------- ALERT CONTEXT ---------- #
+
+    alerts = (
+
+        Alert.query
+
+        .filter_by(device_id=device_id)
+
+        .order_by(Alert.created_at.desc())
+
+        .limit(5)
+
+        .all()
+    )
+
+    alert_text = []
+
+    for a in alerts:
+
+        alert_text.append(
+
+            f"- {a.message} ({a.severity})"
+        )
+
+    # ---------- PROCESS SUMMARY ---------- #
+
+    process_text = []
+
+    for p in processes:
+
+        process_text.append(
+
+            f"""
+Process: {p.get('name')}
+CPU: {p.get('cpu')}%
+Memory: {p.get('memory')}%
+Threads: {p.get('threads')}
+Status: {p.get('status')}
+User: {p.get('user')}
+"""
+        )
+
+    # ---------- AI PROMPT ---------- #
+
+    prompt = f"""
+
+You are an expert:
+
+- Infrastructure Engineer
+- SRE Engineer
+- DevOps Engineer
+- Observability Architect
+- Incident Response Specialist
+
+You are analyzing LIVE machine telemetry.
+
+================================================
+
+DEVICE:
+{device.name}
+
+DEVICE STATUS:
+{device.status}
+
+================================================
+
+LIVE METRICS:
+
+CPU Usage:
+{metric.cpu_usage}%
+
+Memory Usage:
+{metric.memory_usage}%
+
+Disk Usage:
+{metric.disk_usage}%
+
+Running Processes:
+{metric.processes}
+
+Upload Speed:
+{metric.upload} KB/s
+
+Download Speed:
+{metric.download} KB/s
+
+System Uptime:
+{metric.uptime} seconds
+
+================================================
+
+TOP PROCESSES:
+
+{"".join(process_text)}
+
+================================================
+
+RECENT ALERTS:
+
+{"".join(alert_text)}
+
+================================================
+
+USER QUESTION:
+
+{user_query}
+
+================================================
+
+Provide:
+
+1. Root Cause Analysis
+2. Severity Level
+3. Operational Explanation
+4. Infrastructure Risks
+5. Recommended Remediation
+6. Whether issue is temporary or critical
+7. Performance optimization suggestions
+
+IMPORTANT:
+- Avoid generic AI responses
+- Focus specifically on telemetry
+- Be concise but technical
+- Think like an SRE engineer
+- Explain probable infrastructure behavior
+
+"""
+
+    try:
+
+        model = genai.GenerativeModel(
+            "gemini-2.5-flash"
+        )
+
+        result = model.generate_content(
+            prompt
+        )
+
+        return jsonify({
+
+            "device": device.name,
+
+            "question": user_query,
+
+            "response": result.text
+        })
+
+    except Exception as e:
+
+        return jsonify({
+
+            "error": str(e)
+
+        }), 500
 
 
 @app.route("/history")

@@ -7,101 +7,384 @@
   <link rel="stylesheet" href="/static/style.css">
 
   <style>
+
     body{
       margin:0;
       min-height:100vh;
+
       background:
-        radial-gradient(150% 120% at top,#1a1a38,#05050a);
+      radial-gradient(
+        150% 120% at top,
+        #1a1a38,
+        #05050a
+      );
+
       color:#f1f3ff;
+
       font-family:Inter,system-ui;
+
       display:flex;
+
       align-items:flex-start;
+
       justify-content:center;
     }
 
     .wrap{
+
       width:100%;
-      max-width:960px;
+
+      max-width:980px;
+
       margin:40px 16px;
-      padding:24px 22px 26px;
-      background:linear-gradient(180deg,#141432,#0e0e22);
-      border-radius:20px;
+
+      padding:24px 22px 30px;
+
+      background:linear-gradient(
+        180deg,
+        #141432,
+        #0e0e22
+      );
+
+      border-radius:22px;
+
       border:1px solid rgba(255,255,255,.12);
-      box-shadow:0 14px 32px rgba(0,0,0,.55);
+
+      box-shadow:
+      0 14px 32px rgba(0,0,0,.55);
+
       animation:fadeUp .7s ease both;
     }
 
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    @keyframes fadeUp{
 
-    h1{margin:6px 0 6px;font-size:1.9rem}
-    p{color:#a9aecf;line-height:1.6}
+      from{
+        opacity:0;
+        transform:translateY(16px);
+      }
+
+      to{
+        opacity:1;
+        transform:none;
+      }
+    }
+
+    h1{
+      margin:6px 0 6px;
+      font-size:1.9rem;
+    }
+
+    p{
+      color:#a9aecf;
+      line-height:1.6;
+    }
 
     .row{
+
       display:grid;
+
       grid-template-columns:1fr 1fr;
+
       gap:18px;
+
       margin-top:16px;
     }
 
     label{
+
       font-size:.85rem;
+
       color:#bcc1e0;
+
       display:block;
+
       margin-bottom:6px;
     }
 
-    select,button{
+    select,
+    button{
+
       width:100%;
+
       padding:11px 12px;
+
       border-radius:12px;
+
       border:1px solid rgba(255,255,255,.14);
+
       background:#1b1b36;
+
       color:#f1f3ff;
+
       font-size:.95rem;
+
       outline:none;
     }
 
     select:focus{
+
       border-color:rgba(134,86,255,.6);
     }
 
     button{
+
       margin-top:10px;
-      background:linear-gradient(135deg,#8656ff,#4ab3ff);
+
+      background:linear-gradient(
+        135deg,
+        #8656ff,
+        #4ab3ff
+      );
+
       font-weight:700;
+
       cursor:pointer;
-      box-shadow:0 14px 30px rgba(120,80,255,.3);
+
+      box-shadow:
+      0 14px 30px rgba(120,80,255,.3);
+
       transition:.25s;
+
+      border:none;
     }
 
     button:hover{
+
       transform:translateY(-2px);
+
       opacity:.97;
     }
 
     #output{
+
       margin-top:22px;
-      padding:18px;
-      border-radius:16px;
+
+      padding:20px;
+
+      border-radius:18px;
+
       background:#0f0f23;
+
       border:1px solid rgba(255,255,255,.10);
+
       min-height:130px;
+
       white-space:pre-wrap;
-      line-height:1.55;
+
+      line-height:1.7;
+
       color:#d6d9ff;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
+
+      box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.03);
+
       animation:fadeUp .7s ease both;
     }
 
     .back{
+
       display:inline-block;
+
       margin-bottom:14px;
+
       font-size:.9rem;
+
       color:#9fb3ff;
+
       text-decoration:none;
+
       transition:.25s;
     }
-    .back:hover{color:#cfd8ff}
+
+    .back:hover{
+      color:#cfd8ff;
+    }
+
+    /* ---------- INCIDENT ASSISTANT ---------- */
+
+    .incident-wrapper{
+
+      margin-top:34px;
+
+      padding:24px;
+
+      border-radius:22px;
+
+      background:linear-gradient(
+        180deg,
+        #12122a,
+        #0c0c1b
+      );
+
+      border:1px solid rgba(255,255,255,.08);
+
+      box-shadow:
+      0 18px 40px rgba(0,0,0,.45);
+
+      animation:fadeUp .6s ease;
+    }
+
+    .incident-header h2{
+
+      margin:0 0 8px;
+
+      font-size:1.4rem;
+
+      color:#eef1ff;
+    }
+
+    .incident-header p{
+
+      margin:0;
+
+      color:#aab2d6;
+
+      line-height:1.6;
+    }
+
+    .incident-input-area{
+
+      margin-top:22px;
+    }
+
+    #incidentQuery{
+
+      width:100%;
+
+      min-height:130px;
+
+      padding:16px;
+
+      border-radius:16px;
+
+      border:1px solid rgba(255,255,255,.08);
+
+      background:#090914;
+
+      color:white;
+
+      font-size:.96rem;
+
+      resize:vertical;
+
+      outline:none;
+
+      transition:.25s;
+
+      box-sizing:border-box;
+    }
+
+    #incidentQuery:focus{
+
+      border-color:#7d5cff;
+
+      box-shadow:
+      0 0 0 4px rgba(125,92,255,.15);
+    }
+
+    .incident-input-area button{
+
+      margin-top:14px;
+
+      padding:12px 18px;
+
+      border:none;
+
+      border-radius:14px;
+
+      background:linear-gradient(
+        135deg,
+        #7d5cff,
+        #4ab3ff
+      );
+
+      color:white;
+
+      font-weight:700;
+
+      cursor:pointer;
+
+      transition:.25s;
+    }
+
+    .incident-input-area button:hover{
+
+      transform:translateY(-2px);
+
+      opacity:.96;
+    }
+
+    /* ---------- LOADING ---------- */
+
+    .incident-loading{
+
+      margin-top:18px;
+
+      display:none;
+
+      align-items:center;
+
+      gap:14px;
+
+      color:#bfc6e6;
+    }
+
+    .loader{
+
+      width:20px;
+
+      height:20px;
+
+      border-radius:50%;
+
+      border:3px solid rgba(255,255,255,.15);
+
+      border-top-color:#7d5cff;
+
+      animation:spin 1s linear infinite;
+    }
+
+    @keyframes spin{
+
+      to{
+        transform:rotate(360deg);
+      }
+    }
+
+    /* ---------- RESPONSE ---------- */
+
+    .incident-response{
+
+      margin-top:22px;
+
+      padding:22px;
+
+      border-radius:18px;
+
+      background:#090913;
+
+      border:1px solid rgba(255,255,255,.06);
+
+      color:#dce2ff;
+
+      line-height:1.8;
+
+      white-space:pre-wrap;
+
+      min-height:160px;
+    }
+
+    @media(max-width:768px){
+
+      .row{
+        grid-template-columns:1fr;
+      }
+
+      .wrap{
+        margin:20px 10px;
+      }
+    }
+
   </style>
 </head>
 
@@ -109,34 +392,134 @@
 
 <div class="wrap">
 
-  <a href="/dashboard" class="back">← Back to Dashboard</a>
+  <a href="/dashboard" class="back">
+    ← Back to Dashboard
+  </a>
 
   <h1>AI System Insights</h1>
+
   <p>
     Select a device and time window — the AI will analyze performance,
-    detect risks, and recommend improvements.
+    detect risks, identify anomalies, and recommend improvements.
   </p>
 
+  <!-- FILTERS -->
+
   <div class="row">
+
     <div>
+
       <label>Device</label>
+
       <select id="deviceSelect"></select>
+
     </div>
 
     <div>
+
       <label>Time Range</label>
+
       <select id="rangeSelect">
-        <option value="30">Last 30 minutes</option>
-        <option value="60">Last 1 hour</option>
-        <option value="180">Last 3 hours</option>
-        <option value="1440">Last 24 hours</option>
+
+        <option value="30">
+          Last 30 minutes
+        </option>
+
+        <option value="60">
+          Last 1 hour
+        </option>
+
+        <option value="180">
+          Last 3 hours
+        </option>
+
+        <option value="1440">
+          Last 24 hours
+        </option>
+
       </select>
+
     </div>
+
   </div>
 
-  <button onclick="generateInsights()">Generate Insights</button>
+  <button onclick="generateInsights()">
+    Generate Insights
+  </button>
 
-  <div id="output">AI results will appear here…</div>
+  <!-- AI SUMMARY OUTPUT -->
+
+  <div id="output">
+
+    AI results will appear here…
+
+  </div>
+
+  <!-- AI INCIDENT ASSISTANT -->
+
+  <div class="incident-wrapper">
+
+    <div class="incident-header">
+
+      <h2>AI Incident Assistant</h2>
+
+      <p>
+        Ask questions about infrastructure,
+        CPU spikes,
+        suspicious processes,
+        memory pressure,
+        performance issues,
+        or operational anomalies.
+      </p>
+
+    </div>
+
+    <div class="incident-input-area">
+
+      <textarea
+        id="incidentQuery"
+        placeholder="Example:
+Why is CPU usage high?
+Is chrome.exe suspicious?
+Why are threads increasing?"
+      ></textarea>
+
+      <button onclick="askIncidentAI()">
+
+        Analyze Infrastructure
+
+      </button>
+
+    </div>
+
+    <!-- LOADING -->
+
+    <div
+      id="incidentLoading"
+      class="incident-loading"
+    >
+
+      <div class="loader"></div>
+
+      <span>
+        AI is analyzing infrastructure telemetry...
+      </span>
+
+    </div>
+
+    <!-- RESPONSE -->
+
+    <div
+      id="incidentResponse"
+      class="incident-response"
+    >
+
+      AI responses will appear here...
+
+    </div>
+
+  </div>
+
 </div>
 
 <script src="/static/insight.js"></script>
